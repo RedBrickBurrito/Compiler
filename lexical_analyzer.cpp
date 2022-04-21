@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string.h>
-#include <math.h>
 #include <fstream>
 using namespace std;
 
@@ -142,10 +141,13 @@ class LexicalAnalyzer {
 		int errorLine = 1;
 		int tokenId = 28;
 		int numberId = 29;
+		int commentId = 30;
 		// id index starts at 8, because of reserved words
 		int idIndex = 9;
 		int numberIndex = 1;
 		int symbolIndex = 1;
+		// file to write the scanner outputs
+		ofstream scannerOutput;
 	public:
 
 		LexicalAnalyzer() {
@@ -159,6 +161,9 @@ class LexicalAnalyzer {
 			identifiersSymbolTable.insert(tokenId,"while", 		6);
 			identifiersSymbolTable.insert(tokenId,"input", 		7);
 			identifiersSymbolTable.insert(tokenId,"output", 	8);
+
+			// create new text file named scannerOutput, where the result of the scanner will be written
+			scannerOutput.open("scannerOutput.txt");
 		}
 
 		int checkAcceptorsState(int state, string &id, string &number, string &specialSymbol) {
@@ -180,113 +185,136 @@ class LexicalAnalyzer {
 
 				if(checkIfIdIsReservedWord(lowerCaseId, tempIndexId)) {
 					cout << identifiersSymbolTable.getSlot(tokenId,tempIndexId) << "\n";
+					scannerOutput << identifiersSymbolTable.getSlot(tokenId,tempIndexId) << "\n";
 				} else {
 					identifiersSymbolTable.insert(tokenId ,id, idIndex);
 					cout << tokenId << " , " << identifiersSymbolTable.getSlot(tokenId, idIndex) << "\n";
+					scannerOutput << tokenId << " , " << identifiersSymbolTable.getSlot(tokenId, idIndex) << "\n";
 					idIndex++;
 				}
 				break;
 			case 11:
 				numbersSymbolTable.insert(numberId ,number, numberIndex);
 				cout << numberId << " , " << numbersSymbolTable.getSlot(numberId, numberIndex) << "\n";
+				scannerOutput << numberId << " , " << numbersSymbolTable.getSlot(numberId, numberIndex) << "\n";
 				numberIndex++;
 				break;
 			case 12:
-				cout << "30" << "\n";
+				cout << to_string(commentId) << "\n";
+				scannerOutput << "30" << "\n";
 				break;
 			case 13:
 				specialSymbolsTable.insert(9,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(9,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(9,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 14:
 				specialSymbolsTable.insert(10,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(10,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(10,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 15:
 				specialSymbolsTable.insert(11,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(11,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(11,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 16:
 				specialSymbolsTable.insert(12,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(12,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(12,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 17:
 				specialSymbolsTable.insert(13,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(13,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(13,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 18:
 				specialSymbolsTable.insert(14,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(14,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(14,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 19:
 				specialSymbolsTable.insert(15,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(15,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(15,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 20:
 				specialSymbolsTable.insert(16,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(16,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(16,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 21:
 				specialSymbolsTable.insert(17,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(17,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(17,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 22:
 				specialSymbolsTable.insert(18,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(18,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(18,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 23:
 				specialSymbolsTable.insert(19,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(19,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(19,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 24:
 				specialSymbolsTable.insert(20,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(20,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(20,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 25:
 				specialSymbolsTable.insert(21,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(21,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(21,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 26:
 				specialSymbolsTable.insert(22,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(22,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(22,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 27:
 				specialSymbolsTable.insert(23,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(23,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(23,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 28:
 				specialSymbolsTable.insert(24,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(24,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(24,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 29:
 				specialSymbolsTable.insert(25,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(25,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(25,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 30:
 				specialSymbolsTable.insert(26,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(26,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(26,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			case 31:
 				specialSymbolsTable.insert(27,specialSymbol, symbolIndex);
 				cout << specialSymbolsTable.getTokenId(27,symbolIndex) << "\n";
+				scannerOutput << specialSymbolsTable.getTokenId(27,symbolIndex) << "\n";
 				symbolIndex++;
 				break;
 			} 
@@ -298,21 +326,26 @@ class LexicalAnalyzer {
 		}
 
 		bool checkErrorsState(int state, int errorLine) {
+
 			switch(state) {
 				case 32:
 					cout << "Id error in line " << errorLine << "\n";
+					scannerOutput << "Id error in line " << errorLine << "\n";
 					return true;
 					break;
 				case 33:
 					cout << "Number error in line " << errorLine << "\n";
+					scannerOutput << "Number error in line " << errorLine << "\n";
 					return true;
 					break;
 				case 34:
 					cout << "Special Symbol error in line " << errorLine << "\n";
+					scannerOutput << "Special Symbol error in line " << errorLine << "\n";
 					return true;
 					break;
 				case 35:
 					cout << "Unknown character error in line " << errorLine << "\n";
+					scannerOutput << "Unknown character error in line " << errorLine << "\n";
 					return true;
 					break;
 			}
@@ -390,6 +423,7 @@ class LexicalAnalyzer {
 			int row = 0;
 			bool isInAcceptorsTable = false;
 			bool isInErrorsTable = false;
+			int commentErrorLine;
 
 			ch = getc(file);
 
@@ -426,7 +460,11 @@ class LexicalAnalyzer {
 					
 					// if we reach the end of the file and we are in a comment
 					if(feof(file) && state == 4) {
-						cout << "Comment not closed";
+						cout << "Comment not closed in line " << commentErrorLine << "\n";
+						return "\n";
+					}
+
+					if(feof(file)) {
 						return "\n";
 					}
 
@@ -464,6 +502,9 @@ class LexicalAnalyzer {
 						
 						break;
 					case 4:
+						if(ch == '*') {
+							commentErrorLine = errorLine;
+						}
 						ch = getc(file);
 						break;
 					case 5:
@@ -609,8 +650,8 @@ class LexicalAnalyzer {
 					case 35:
 						isInErrorsTable = true;
 						break;
-					}
-				}
+					} // end of switch case
+				} // end of while
 				
 				if(isInAcceptorsTable == true) {
 
@@ -627,8 +668,10 @@ class LexicalAnalyzer {
 					return "\n";
 				}
 
-			}
+			} // end of while
 
+			// close the file to prevent corruption
+			scannerOutput.close();
 			return "\n";
 		}
 };

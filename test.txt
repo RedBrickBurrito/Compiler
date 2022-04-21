@@ -1,0 +1,7 @@
+int i = 1;
+int j = 2;
+
+/* Simple for loop */
+for(i; i < j; i++) {
+	output i;
+}
