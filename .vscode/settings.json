@@ -6,6 +6,7 @@
         "string_view": "cpp",
         "system_error": "cpp",
         "*.tcc": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "iostream": "cpp"
     }
 }

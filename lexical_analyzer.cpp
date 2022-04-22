@@ -1,10 +1,11 @@
 #include <iostream>
 #include <string.h>
 #include <fstream>
+#include <math.h>
 using namespace std;
 
 // hash table max size
-#define CAPACITY 100000
+#define CAPACITY 100000000
 
 
 class HashEntry {
@@ -36,9 +37,20 @@ class UnorderedHashTable {
 	private:
 		HashEntry **table;
 
-		unsigned long long createHash(int tokenId, int Index) {
+		unsigned long long createHash(int tokenId, string Id) {
+			string asciiCode = "";
+
+			// iterate and transform each character in string to ascii code
+			for(int i = 0; i < Id.length(); i++) {
+				asciiCode += to_string(int(Id[i]));
+				if(asciiCode.length() > 14) {
+					break;
+				}
+			}
+
 			// Use divide method ; h(k) = k mod m
-			int k = tokenId + Index;
+			string tempK = to_string(tokenId) + asciiCode;
+			long long k = stoll(tempK);
 			unsigned long long hash = k % CAPACITY; 
 
 			return hash;
@@ -62,8 +74,8 @@ class UnorderedHashTable {
 			}
 		}
 
-		string getSlot(int tokenId,int idIndex) {
-			long long hash = createHash(tokenId,idIndex);
+		string getSlot(int tokenId,string content) {
+			long long hash = createHash(tokenId,content);
 
 			if(table[hash] != nullptr) {
 				return to_string(table[hash]->getSlot());
@@ -72,8 +84,18 @@ class UnorderedHashTable {
 			}
 		}
 
-		string getTokenId(int tokenId,int idIndex) {
-			long long hash = createHash(tokenId,idIndex);
+		string getContent(int tokenId, string content) {
+			long long hash = createHash(tokenId, content);
+
+			if(table[hash] != nullptr) {
+				return table[hash]->getContent();
+			} else {
+				return "There is no such entry in the symbol table";
+			}
+		}
+
+		string getTokenId(int tokenId,string content) {
+			long long hash = createHash(tokenId,content);
 
 			if(table[hash] != nullptr) {
 				return to_string(table[hash]->getTokenId());
@@ -83,7 +105,7 @@ class UnorderedHashTable {
 		}
 
 		void insert(int tokenId, string content,int slot) {
-			long long hash = createHash(tokenId, slot);
+			long long hash = createHash(tokenId, content);
 
 			checkCollisions(hash, slot);
 
@@ -184,19 +206,32 @@ class LexicalAnalyzer {
 				}
 
 				if(checkIfIdIsReservedWord(lowerCaseId, tempIndexId)) {
-					cout << identifiersSymbolTable.getSlot(tokenId,tempIndexId) << "\n";
-					scannerOutput << identifiersSymbolTable.getSlot(tokenId,tempIndexId) << "\n";
+					cout << identifiersSymbolTable.getSlot(tokenId,lowerCaseId) << "\n";
+					scannerOutput << identifiersSymbolTable.getSlot(tokenId,lowerCaseId) << "\n";
 				} else {
-					identifiersSymbolTable.insert(tokenId ,id, idIndex);
-					cout << tokenId << " , " << identifiersSymbolTable.getSlot(tokenId, idIndex) << "\n";
-					scannerOutput << tokenId << " , " << identifiersSymbolTable.getSlot(tokenId, idIndex) << "\n";
-					idIndex++;
+					// if the id is already stored in the table
+					if(id == identifiersSymbolTable.getContent(tokenId, id)) {
+						cout << tokenId << " , " << identifiersSymbolTable.getSlot(tokenId, id) << "\n";
+						scannerOutput << tokenId << " , " << identifiersSymbolTable.getSlot(numberId, id) << "\n";
+						break;
+					} else {
+						identifiersSymbolTable.insert(tokenId ,id, idIndex);
+						cout << tokenId << " , " << identifiersSymbolTable.getSlot(tokenId, id) << "\n";
+						scannerOutput << tokenId << " , " << identifiersSymbolTable.getSlot(tokenId, id) << "\n";
+						idIndex++;
+					}
 				}
 				break;
 			case 11:
+				// if the number is already stored in the table
+				if(number == numbersSymbolTable.getContent(numberId, number)) {
+					cout << numberId << " , " << numbersSymbolTable.getSlot(numberId, number) << "\n";
+					scannerOutput << numberId << " , " << numbersSymbolTable.getSlot(numberId, number) << "\n";
+					break;
+				}
 				numbersSymbolTable.insert(numberId ,number, numberIndex);
-				cout << numberId << " , " << numbersSymbolTable.getSlot(numberId, numberIndex) << "\n";
-				scannerOutput << numberId << " , " << numbersSymbolTable.getSlot(numberId, numberIndex) << "\n";
+				cout << numberId << " , " << numbersSymbolTable.getSlot(numberId, number) << "\n";
+				scannerOutput << numberId << " , " << numbersSymbolTable.getSlot(numberId, number) << "\n";
 				numberIndex++;
 				break;
 			case 12:
@@ -204,117 +239,175 @@ class LexicalAnalyzer {
 				scannerOutput << "30" << "\n";
 				break;
 			case 13:
+				// if the special symbol is already stored in the table
+				if(specialSymbol == specialSymbolsTable.getContent(9, specialSymbol)) {
+					printSpecialSymbolsOutput(9, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(9,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(9,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(9,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(9, specialSymbol);
 				symbolIndex++;
 				break;
 			case 14:
+				if(specialSymbol == specialSymbolsTable.getContent(10, specialSymbol)) {
+					printSpecialSymbolsOutput(10, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(10,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(10,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(10,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(10, specialSymbol);
 				symbolIndex++;
 				break;
 			case 15:
+				if(specialSymbol == specialSymbolsTable.getContent(11, specialSymbol)) {
+					printSpecialSymbolsOutput(11, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(11,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(11,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(11,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(11, specialSymbol);
 				symbolIndex++;
 				break;
 			case 16:
+				if(specialSymbol == specialSymbolsTable.getContent(12, specialSymbol)) {
+					printSpecialSymbolsOutput(12, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(12,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(12,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(12,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(12, specialSymbol);
 				symbolIndex++;
 				break;
 			case 17:
+				if(specialSymbol == specialSymbolsTable.getContent(13, specialSymbol)) {
+					printSpecialSymbolsOutput(13, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(13,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(13,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(13,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(13, specialSymbol);
 				symbolIndex++;
 				break;
 			case 18:
+				if(specialSymbol == specialSymbolsTable.getContent(14, specialSymbol)) {
+					printSpecialSymbolsOutput(14, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(14,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(14,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(14,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(14, specialSymbol);
 				symbolIndex++;
 				break;
 			case 19:
+				if(specialSymbol == specialSymbolsTable.getContent(15, specialSymbol)) {
+					printSpecialSymbolsOutput(15, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(15,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(15,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(15,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(15, specialSymbol);
 				symbolIndex++;
 				break;
 			case 20:
+				if(specialSymbol == specialSymbolsTable.getContent(16, specialSymbol)) {
+					printSpecialSymbolsOutput(16, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(16,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(16,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(16,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(16, specialSymbol);
 				symbolIndex++;
 				break;
 			case 21:
+				if(specialSymbol == specialSymbolsTable.getContent(17, specialSymbol)) {
+					printSpecialSymbolsOutput(17, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(17,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(17,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(17,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(17, specialSymbol);
 				symbolIndex++;
 				break;
 			case 22:
+				if(specialSymbol == specialSymbolsTable.getContent(18, specialSymbol)) {
+					printSpecialSymbolsOutput(18, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(18,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(18,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(18,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(18, specialSymbol);
 				symbolIndex++;
 				break;
 			case 23:
+				if(specialSymbol == specialSymbolsTable.getContent(19, specialSymbol)) {
+					printSpecialSymbolsOutput(19, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(19,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(19,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(19,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(19, specialSymbol);
 				symbolIndex++;
 				break;
 			case 24:
+				if(specialSymbol == specialSymbolsTable.getContent(20, specialSymbol)) {
+					printSpecialSymbolsOutput(20, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(20,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(20,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(20,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(20, specialSymbol);
 				symbolIndex++;
 				break;
 			case 25:
+				if(specialSymbol == specialSymbolsTable.getContent(21, specialSymbol)) {
+					printSpecialSymbolsOutput(21, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(21,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(21,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(21,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(21, specialSymbol);
 				symbolIndex++;
 				break;
 			case 26:
+				if(specialSymbol == specialSymbolsTable.getContent(22, specialSymbol)) {
+					printSpecialSymbolsOutput(22, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(22,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(22,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(22,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(22, specialSymbol);
 				symbolIndex++;
 				break;
 			case 27:
+				if(specialSymbol == specialSymbolsTable.getContent(23, specialSymbol)) {
+					printSpecialSymbolsOutput(23, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(23,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(23,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(23,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(23, specialSymbol);
 				symbolIndex++;
 				break;
 			case 28:
+				if(specialSymbol == specialSymbolsTable.getContent(24, specialSymbol)) {
+					printSpecialSymbolsOutput(24, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(24,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(24,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(24,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(24, specialSymbol);
 				symbolIndex++;
 				break;
 			case 29:
+				if(specialSymbol == specialSymbolsTable.getContent(25, specialSymbol)) {
+					printSpecialSymbolsOutput(25, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(25,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(25,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(25,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(25, specialSymbol);
 				symbolIndex++;
 				break;
 			case 30:
+				if(specialSymbol == specialSymbolsTable.getContent(26, specialSymbol)) {
+					printSpecialSymbolsOutput(26, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(26,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(26,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(26,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(26, specialSymbol);
 				symbolIndex++;
 				break;
 			case 31:
+				if(specialSymbol == specialSymbolsTable.getContent(27, specialSymbol)) {
+					printSpecialSymbolsOutput(27, specialSymbol);
+					break;
+				}
 				specialSymbolsTable.insert(27,specialSymbol, symbolIndex);
-				cout << specialSymbolsTable.getTokenId(27,symbolIndex) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(27,symbolIndex) << "\n";
+				printSpecialSymbolsOutput(27, specialSymbol);
 				symbolIndex++;
 				break;
 			} 
@@ -351,6 +444,11 @@ class LexicalAnalyzer {
 			}
 
 			return false;
+		}
+
+		void printSpecialSymbolsOutput(int specialSymbolsSate, string specialSymbol) {
+			cout << specialSymbolsTable.getTokenId(specialSymbolsSate,specialSymbol) << "\n";
+			scannerOutput << specialSymbolsTable.getTokenId(specialSymbolsSate,specialSymbol) << "\n";
 		}
 		
 		bool checkIfIdIsReservedWord(string id, int &tempIdIndex) {
@@ -465,7 +563,7 @@ class LexicalAnalyzer {
 					}
 
 					if(feof(file)) {
-						return "\n";
+						row = 2;
 					}
 
 					state = transitionTable[state][row];
@@ -478,14 +576,17 @@ class LexicalAnalyzer {
 					case 1:
 						if(state == 10) {
 							isInAcceptorsTable = true;
+							break;
 						} else if(state == 32) {
 							isInErrorsTable = true;
+							break;
 						}
 						ch = getc(file);
 						break;
 					case 2:
 						if(state == 11) {
 							isInAcceptorsTable = true;
+							break;
 						} else if(state == 33) {
 							isInErrorsTable = true;
 						}
@@ -495,8 +596,10 @@ class LexicalAnalyzer {
 					case 3:
 						if(state == 13) {
 							isInAcceptorsTable = true;
+							break;
 						} else if(state == 35) {
 							isInErrorsTable = true;
+							break;
 						}
 						ch = getc(file);
 						
@@ -513,32 +616,40 @@ class LexicalAnalyzer {
 					case 6:
 						if(state == 17 | state == 18) {
 							isInAcceptorsTable = true;
+							break;
 						} else if(state == 34) {
 							isInErrorsTable = true;
+							break;
 						}
 						ch = getc(file);
 						break;
 					case 7:
 						if(state == 19) {
 							isInAcceptorsTable = true;
+							break;
 						} else if(state == 34) {
 							isInErrorsTable = true;
+							break;
 						}
 						ch = getc(file);
 						break;
 					case 8:
 						if(state == 20 | state == 21) {
 							isInAcceptorsTable = true;
+							break;
 						} else if(state == 34) {
 							isInErrorsTable = true;
+							break;
 						}
 						ch = getc(file);
 						break;
 					case 9:
 						if(state == 22 | state == 23) {
 							isInAcceptorsTable = true;
+							break;
 						} else if(state == 34) {
 							isInErrorsTable = true;
+							break;
 						}
 						ch = getc(file);
 						break;
