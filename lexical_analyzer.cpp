@@ -161,6 +161,7 @@ class LexicalAnalyzer {
 		UnorderedHashTable numbersSymbolTable;
 		UnorderedHashTable specialSymbolsTable;
 		int errorLine = 1;
+		// Id of tokens, as defined in the analysis section
 		int tokenId = 28;
 		int numberId = 29;
 		int commentId = 30;
@@ -193,6 +194,7 @@ class LexicalAnalyzer {
 			string lowerCaseId = "";
 			// create a temp Index, so that we dont modify the id Index
 			int tempIndexId;
+			const int previousStates = 4;
 			switch (state)
 			{
 			case 10:
@@ -240,174 +242,175 @@ class LexicalAnalyzer {
 				break;
 			case 13:
 				// if the special symbol is already stored in the table
-				if(specialSymbol == specialSymbolsTable.getContent(9, specialSymbol)) {
-					printSpecialSymbolsOutput(9, specialSymbol);
+				// rest 4 to the state, because we already have letter, numbers, comments before the special symbol
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(9,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(9, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 14:
-				if(specialSymbol == specialSymbolsTable.getContent(10, specialSymbol)) {
-					printSpecialSymbolsOutput(10, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(10,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(10, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 15:
-				if(specialSymbol == specialSymbolsTable.getContent(11, specialSymbol)) {
-					printSpecialSymbolsOutput(11, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(11,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(11, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 16:
-				if(specialSymbol == specialSymbolsTable.getContent(12, specialSymbol)) {
-					printSpecialSymbolsOutput(12, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(12,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(12, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 17:
-				if(specialSymbol == specialSymbolsTable.getContent(13, specialSymbol)) {
-					printSpecialSymbolsOutput(13, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(13,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(13, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 18:
-				if(specialSymbol == specialSymbolsTable.getContent(14, specialSymbol)) {
-					printSpecialSymbolsOutput(14, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(14,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(14, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 19:
-				if(specialSymbol == specialSymbolsTable.getContent(15, specialSymbol)) {
-					printSpecialSymbolsOutput(15, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(15,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(15, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 20:
-				if(specialSymbol == specialSymbolsTable.getContent(16, specialSymbol)) {
-					printSpecialSymbolsOutput(16, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(16,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(16, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 21:
-				if(specialSymbol == specialSymbolsTable.getContent(17, specialSymbol)) {
-					printSpecialSymbolsOutput(17, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(17,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(17, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 22:
-				if(specialSymbol == specialSymbolsTable.getContent(18, specialSymbol)) {
-					printSpecialSymbolsOutput(18, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(18,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(18, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 23:
-				if(specialSymbol == specialSymbolsTable.getContent(19, specialSymbol)) {
-					printSpecialSymbolsOutput(19, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(19,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(19, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 24:
-				if(specialSymbol == specialSymbolsTable.getContent(20, specialSymbol)) {
-					printSpecialSymbolsOutput(20, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(20,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(20, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 25:
-				if(specialSymbol == specialSymbolsTable.getContent(21, specialSymbol)) {
-					printSpecialSymbolsOutput(21, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(21,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(21, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 26:
-				if(specialSymbol == specialSymbolsTable.getContent(22, specialSymbol)) {
-					printSpecialSymbolsOutput(22, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(22,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(22, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 27:
-				if(specialSymbol == specialSymbolsTable.getContent(23, specialSymbol)) {
-					printSpecialSymbolsOutput(23, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(23,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(23, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 28:
-				if(specialSymbol == specialSymbolsTable.getContent(24, specialSymbol)) {
-					printSpecialSymbolsOutput(24, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(24,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(24, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 29:
-				if(specialSymbol == specialSymbolsTable.getContent(25, specialSymbol)) {
-					printSpecialSymbolsOutput(25, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(25,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(25, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 30:
-				if(specialSymbol == specialSymbolsTable.getContent(26, specialSymbol)) {
-					printSpecialSymbolsOutput(26, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(26,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(26, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			case 31:
-				if(specialSymbol == specialSymbolsTable.getContent(27, specialSymbol)) {
-					printSpecialSymbolsOutput(27, specialSymbol);
+				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+					printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(27,specialSymbol, symbolIndex);
-				printSpecialSymbolsOutput(27, specialSymbol);
+				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				printSpecialSymbolsOutput(state - previousStates, specialSymbol);
 				symbolIndex++;
 				break;
 			} 
@@ -562,6 +565,7 @@ class LexicalAnalyzer {
 						return "\n";
 					}
 
+					// if we reached the end of file set the row to whitespace to store whatever id, number or special symbol left.
 					if(feof(file)) {
 						row = 2;
 					}
@@ -800,5 +804,4 @@ int main() {
 	lexicalAnalyzer.readCharStream(filename);
 
 	return 0;
-
 }
