@@ -483,6 +483,7 @@ class LexicalAnalyzer {
 				scannerOutput << numberId << " , " << numbersSymbolTable.getSlot(numberId, content) << "\n";
 				return;
 			} else if( specialSymbolId >= 0 && specialSymbolId <= 19) {
+				// it starts at 9, because before we have the reserved words
 				int startingSpecialSymbolsNumber = 9;
 				cout << to_string(specialSymbolId + startingSpecialSymbolsNumber) << "\n";
 				scannerOutput << to_string(specialSymbolId + startingSpecialSymbolsNumber) << "\n";
