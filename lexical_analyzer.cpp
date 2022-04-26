@@ -234,37 +234,31 @@ class LexicalAnalyzer {
 									  {34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34,34},
 									  {35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35,35},
 									};
+		/* The code below is creating two hash tables, one for identifiers and one for numbers. */
 		UnorderedHashTable identifiersSymbolTable;
 		UnorderedHashTable numbersSymbolTable;
-		UnorderedHashTable specialSymbolsTable;
+		/* The code below is declaring two arrays, one for special symbols and one for reserved words. */
+		string specialSymbols[19] = {"/", "+", "-", "*", "=", "==", "!=", "<", "<=", ">", ">=", ";", ",", "(", ")", "[", "]", "{", "}"};
+		string reservedWords[8] = {"if", "else", "int", "void", "return", "while", "input", "output"};
 		int errorLine = 1;
 		// Id of tokens, as defined in the analysis section
 		int tokenId = 28;
 		int numberId = 29;
 		int commentId = 30;
-		// id index starts at 8, because of reserved words
-		int idIndex = 9;
+		// start index at 1
+		int idIndex = 1;
 		int numberIndex = 1;
 		int symbolIndex = 1;
-		const int previousStates = 4;
+		// becase acceptors states start at 10, 13 is where special symbols acceptors state start
+		const int previousStates = 13;
 		// file to write the scanner outputs
 		ofstream scannerOutput;
 	public:
 
 		/**
-		 * The constructor of the LexicalAnalyzer class initializes the reserved keywords in the symbol table
+		 * The constructor for the LexicalAnalyzer class
 		 */
 		LexicalAnalyzer() {
-			
-			identifiersSymbolTable.insert(tokenId,"if", 		1);
-			identifiersSymbolTable.insert(tokenId,"else", 		2);
-			identifiersSymbolTable.insert(tokenId,"int", 		3);
-			identifiersSymbolTable.insert(tokenId,"void", 		4);
-			identifiersSymbolTable.insert(tokenId,"return", 	5);
-			identifiersSymbolTable.insert(tokenId,"while", 		6);
-			identifiersSymbolTable.insert(tokenId,"input", 		7);
-			identifiersSymbolTable.insert(tokenId,"output", 	8);
-
 			// create new text file named scannerOutput, where the result of the scanner will be written
 			scannerOutput.open("scannerOutput.txt");
 		}
@@ -297,8 +291,8 @@ class LexicalAnalyzer {
 				}
 
 				if(checkIfIdIsReservedWord(lowerCaseId, tempIndexId)) {
-					cout << identifiersSymbolTable.getSlot(tokenId,lowerCaseId) << "\n";
-					scannerOutput << identifiersSymbolTable.getSlot(tokenId,lowerCaseId) << "\n";
+					cout << to_string(tempIndexId) << "\n";
+					scannerOutput << to_string(tempIndexId)  << "\n";
 				} else {
 					// if the id is already stored in the table
 					if(id == identifiersSymbolTable.getContent(tokenId, id)) {
@@ -307,7 +301,6 @@ class LexicalAnalyzer {
 					} else {
 						identifiersSymbolTable.insert(tokenId ,id, idIndex);
 						printAcceptorsOutput(tokenId, id);
-						
 						idIndex++;
 					}
 				}
@@ -325,178 +318,140 @@ class LexicalAnalyzer {
 				break;
 			case 12:
 				cout << to_string(commentId) << "\n";
-				scannerOutput << "30" << "\n";
+				scannerOutput << to_string(commentId) << "\n";
 				break;
 			case 13:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 14:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 15:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 16:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 17:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 18:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 19:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 20:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 21:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 22:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 23:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 24:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 25:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 26:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 27:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 28:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 29:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 30:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
-				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
+				}		
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			case 31:
-				if(specialSymbol == specialSymbolsTable.getContent(state - previousStates, specialSymbol)) {
+				if(specialSymbol == specialSymbols[state - previousStates]) {
 					printAcceptorsOutput(state - previousStates, specialSymbol);
 					break;
 				}
-				specialSymbolsTable.insert(state - previousStates,specialSymbol, symbolIndex);
 				printAcceptorsOutput(state - previousStates, specialSymbol);
-				symbolIndex++;
 				break;
 			} 
 
@@ -507,14 +462,14 @@ class LexicalAnalyzer {
 			return;
 		}
 
-			/**
+		/**
 		 * It prints the tokenId and the slot of the token
 		 * 
 		 * @param tokenId The token id of the token that was accepted.
 		 * @param content The content of the token.
 		 * 
 		 * @return the tokenId and the content of the token.
-		 */
+		*/
 		void printAcceptorsOutput(int tokenId, string content) {
 
 			int numberId = tokenId, specialSymbolId = tokenId;
@@ -527,9 +482,10 @@ class LexicalAnalyzer {
 				cout << numberId << " , " << numbersSymbolTable.getSlot(numberId, content) << "\n";
 				scannerOutput << numberId << " , " << numbersSymbolTable.getSlot(numberId, content) << "\n";
 				return;
-			} else if( specialSymbolId >= 9 && specialSymbolId <= 27) {
-				cout << specialSymbolsTable.getTokenId(specialSymbolId,content) << "\n";
-				scannerOutput << specialSymbolsTable.getTokenId(specialSymbolId,content) << "\n";
+			} else if( specialSymbolId >= 0 && specialSymbolId <= 19) {
+				int startingSpecialSymbolsNumber = 9;
+				cout << to_string(specialSymbolId + startingSpecialSymbolsNumber) << "\n";
+				scannerOutput << to_string(specialSymbolId + startingSpecialSymbolsNumber) << "\n";
 				return;
 			}
 
