@@ -5,6 +5,8 @@
 #include "unordered_hash_table.h"
 using namespace std;
 
+UnorderedHashTable identifiersSymbolTable;
+
 class LexicalAnalyzer {
 	private:
 		// The code below is a transition table for the DFA.
@@ -58,7 +60,6 @@ class LexicalAnalyzer {
 		// file to write the scanner outputs
 		ofstream scannerOutput;
 	public:
-		UnorderedHashTable identifiersSymbolTable;
 		UnorderedHashTable numbersSymbolTable;
 		string specialSymbols[19] = {"/", "+", "-", "*", "=", "==", "!=", "<", "<=", ">", ">=", ";", ",", "(", ")", "[", "]", "{", "}"};
 		string reservedWords[8] = {"if", "else", "int", "void", "return", "while", "input", "output"};
@@ -107,7 +108,7 @@ class LexicalAnalyzer {
 						printAcceptorsOutput(tokenId, id);
 						break;
 					} else {
-						identifiersSymbolTable.insert(tokenId ,id, idIndex);
+						identifiersSymbolTable.insert(tokenId ,id, idIndex, 0, false, false, false, false);
 						printAcceptorsOutput(tokenId, id);
 						idIndex++;
 					}
@@ -119,7 +120,7 @@ class LexicalAnalyzer {
 					printAcceptorsOutput(numberId, number);
 					break;
 				}
-				numbersSymbolTable.insert(numberId ,number, numberIndex);
+				numbersSymbolTable.insert(numberId ,number, numberIndex, 0, false, false, false, false);
 				printAcceptorsOutput(numberId, number);
 
 				numberIndex++;
@@ -498,6 +499,7 @@ class LexicalAnalyzer {
 					// if we reached the end of file set the column to whitespace to store whatever id, number or special symbol left.
 					if(feof(file)) {
 						column = 2;
+						break;
 					}
 
 					state = transitionTable[state][column];
@@ -725,6 +727,9 @@ class LexicalAnalyzer {
 class SyntaxAnalysis {
 	private: 
 		string currentTokenTableIndex = "";
+		string functionTokenIndex = "0";
+		bool isMain = false;
+		int numOfArgs = 1;
 	public:
 	ifstream file;
 	bool matched = false;
@@ -732,13 +737,115 @@ class SyntaxAnalysis {
 		file.open("scannerOutput.txt");
 	}
 
+	string getTokenString(string currentToken) {
+		int token = stoi(currentToken);
+
+		switch (token)
+		{
+		case 1:
+			return "if";
+			break;
+		case 2:
+			return "else";
+			break;
+		case 3:
+			return "int";
+			break;
+		case 4:
+			return "void";
+			break;
+		case 5:
+			return "return";
+			break;
+		case 6:
+			return "while";
+			break;
+		case 7:
+			return "input";
+			break;
+		case 8:
+			return "output";
+			break;
+		case 9:
+			return "/";
+			break;
+		case 10:
+			return "+";
+			break;
+		case 11:
+			return "-";
+			break;
+		case 12:
+			return "*";
+			break;
+		case 13:
+			return "=";
+			break;
+		case 14:
+			return "==";
+			break;
+		case 15:
+			return "!=";
+			break;
+		case 16:
+			return "<";
+			break;
+		case 17:
+			return "<=";
+			break;
+		case 18:
+			return ">";
+			break;
+		case 19:
+			return ">=";
+			break;
+		case 20:
+			return ";";
+			break;
+		case 21:
+			return ",";
+			break;
+		case 22:
+			return "(";
+			break;
+		case 23:
+			return ")";
+			break;
+		case 24:
+			return "[";
+			break;
+		case 25:
+			return "]";
+			break;
+		case 26:
+			return "{";
+			break;
+		case 27:
+			return "}";
+			break;
+		case 28:
+			return "ID";
+			break;
+		case 29:
+			return "NUM";
+			break;
+		}
+	}
+
+	/**
+	 * This function reads the next token from the input file and returns it
+	 * 
+	 * @param currentToken The current token that is being read from the file.
+	 * 
+	 * @return The next token in the file.
+	 */
 	string getNextToken(string &currentToken) {
 		currentToken = "";
-		currentTokenTableIndex = "";
 
 		while(getline(file, currentToken, '\n')) {
 			// check if the input is an identifier, or a number
 			if(currentToken.substr(0,2) == "28" || currentToken.substr(0,2) == "29") {
+				currentTokenTableIndex = "";
 				int position = currentToken.find(" ");
 
 				currentTokenTableIndex = currentToken.substr(position, currentToken.length());
@@ -749,6 +856,11 @@ class SyntaxAnalysis {
 		}
 	}
 
+	/**
+	 * The function starts by getting the first token from the lexical analyzer. Then it calls the program
+	 * function, which is the first non-terminal in the grammar. If the current token is the end of file
+	 * token, then the syntax analysis is successful. Otherwise, it's a syntax error
+	 */
 	void startSyntaxAnalysis() {
 
 		string currentToken = "";
@@ -757,8 +869,16 @@ class SyntaxAnalysis {
 
 		program(currentToken);
 
+		// check if main is in function
+		if(!isMain) {
+			cout << "Syntax Error: main is not declared" << "\n";
+			abort();
+		}
+
 		if(currentToken == "$") {
 			cout << "Syntax Analysis OK" << "\n";
+			// print the table modifications
+			identifiersSymbolTable.printTable();
 			abort();
 		} else {
 			cout << "Syntax Analysis ERROR" << "\n";
@@ -772,17 +892,26 @@ class SyntaxAnalysis {
 		if( currentToken == "3" ) {
 			getNextToken(currentToken);
 			if( currentToken == "28" ) {
+				functionTokenIndex = currentTokenTableIndex;
 				getNextToken(currentToken);
 				declaration(currentToken);
 				program(currentToken);
 			} else {
-				cout << "Syntax Error: Expected ID, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
 		if( currentToken == "4" ) {
 			getNextToken(currentToken);
 			if( currentToken == "28") {
+				functionTokenIndex = currentTokenTableIndex;
+				identifiersSymbolTable.setFunctionProperty( stoi(currentTokenTableIndex) - 1, true);
+				identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
+				// check if identifier is main
+				if( identifiersSymbolTable.getMainKeyword(stoi(currentTokenTableIndex) - 1)) {
+					isMain = true;
+				}
 				getNextToken(currentToken);
 				if( currentToken == "22") {
 					getNextToken(currentToken);
@@ -792,14 +921,17 @@ class SyntaxAnalysis {
 						compound_stmt(currentToken);
 						program(currentToken);
 					} else {
-						cout << "Syntax Error: Expected ) , got: " + currentToken << "\n";
+						cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
+						abort();
 					}
 
 				} else {
-					cout << "Syntax Error: Expected ( , got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected ( , got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected ID, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -810,6 +942,8 @@ class SyntaxAnalysis {
 
 	void declaration(string &currentToken)	{
 		if( currentToken == "20") {
+			identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+			identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
 			getNextToken(currentToken);
 			return;
 		}
@@ -821,31 +955,41 @@ class SyntaxAnalysis {
 				if( currentToken == "25") {
 					getNextToken(currentToken);
 					if( currentToken == "20") {
+						identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+						identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
 						getNextToken(currentToken);
 						return ;
 					} else {
-						cout << "Syntax Error: Expected ;, got: " + currentToken << "\n";
+						cout << "Syntax Error: Expected ;, got: " + getTokenString(currentToken) << "\n";
+						abort();
 					}
 				} else {
-					cout << "Syntax Error: Expected ], got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected ], got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected NUM, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected NUM, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
 		if( currentToken == "22" ) {
+			identifiersSymbolTable.setFunctionProperty( stoi(currentTokenTableIndex) - 1, true);
+			identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
 			getNextToken(currentToken);
 			params(currentToken);
+			numOfArgs = 1;
 			if( currentToken == "23") {
 				getNextToken(currentToken);
 				compound_stmt(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		} else {
-			cout << "Syntax Error: Expected (, got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 
 	}
@@ -859,7 +1003,8 @@ class SyntaxAnalysis {
 				param_list(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ID, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -867,12 +1012,17 @@ class SyntaxAnalysis {
 			getNextToken(currentToken);
 			return;
 		} else {
-			cout << "Syntax Error: Expected void, got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected void, got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
 	void param_list(string &currentToken) {
 		if( currentToken == "21") {
+			numOfArgs++;
+			identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+			identifiersSymbolTable.setLocalProperty( stoi(currentTokenTableIndex) - 1, true);
+			identifiersSymbolTable.setNumberOfArgsProperty( stoi(functionTokenIndex) - 1, numOfArgs );
 			getNextToken(currentToken);
 			if( currentToken == "3" ) {
 				getNextToken(currentToken);
@@ -881,14 +1031,23 @@ class SyntaxAnalysis {
 					param(currentToken);
 					param_list(currentToken);
 					return ;
+				} else {
+					cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
+			} else {
+				cout << "Syntax Error: Expected int, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
 		if( currentToken == "23") {
+			identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+			identifiersSymbolTable.setLocalProperty( stoi(currentTokenTableIndex) - 1, true);
 			return;
 		} else {
-			cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -899,7 +1058,8 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return ;
 			} else {
-				cout << "Syntax Error: Expected ], got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ], got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -910,7 +1070,8 @@ class SyntaxAnalysis {
 		if( currentToken == "23") {
 			return;
 		} else {
-			cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -923,10 +1084,12 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected }, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected }, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		} else {
-			cout << "Syntax Error: Expected {, got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected {, got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -934,9 +1097,14 @@ class SyntaxAnalysis {
 		if( currentToken == "3") {
 			getNextToken(currentToken);
 			if( currentToken == "28" ) {
+				identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+				identifiersSymbolTable.setLocalProperty( stoi(currentTokenTableIndex) - 1, true);
 				getNextToken(currentToken);
 				local_declarations_prime(currentToken);
 				return;
+			} else {
+				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -946,7 +1114,8 @@ class SyntaxAnalysis {
 			
 			return;
 		} else {
-			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -968,16 +1137,20 @@ class SyntaxAnalysis {
 						local_declarations(currentToken);
 						return;
 					} else {
-						cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+						cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+						abort();
 					}
 				} else {
-					cout << "Syntax Error: Expected ] , got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected NUM , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected NUM , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		} else {
-			cout << "Syntax Error: Expected [ , got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected [ , got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -998,7 +1171,8 @@ class SyntaxAnalysis {
 				statement_list(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected }, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected }, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1014,10 +1188,12 @@ class SyntaxAnalysis {
 					statement_list(currentToken);
 					return;
 				} else {
-					cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected (, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1032,10 +1208,12 @@ class SyntaxAnalysis {
 					statement_list(currentToken);
 					return;
 				} else {
-					cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected (, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1056,10 +1234,12 @@ class SyntaxAnalysis {
 					statement_list(currentToken);
 					return;
 				} else {
-					cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected ID, got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1071,14 +1251,16 @@ class SyntaxAnalysis {
 				statement_list(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
 		if( currentToken == "27" ) {
 			return;
 		} else {
-			cout << "Syntax Error: Expected } , got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected } , got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -1095,13 +1277,16 @@ class SyntaxAnalysis {
 						getNextToken(currentToken);
 						return;
 					} else {
-						cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+						cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+						abort();
 					}
 				} else {
-					cout << "Syntax Error: Expected = , got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected = , got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected ] , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1112,7 +1297,8 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1123,7 +1309,8 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			} 
 		}
 
@@ -1141,7 +1328,8 @@ class SyntaxAnalysis {
 			&& currentToken == "8" || currentToken == "27" ) {
 			return;
 		} else {
-			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -1161,7 +1349,8 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1177,10 +1366,12 @@ class SyntaxAnalysis {
 					getNextToken(currentToken);
 					return;
 				} else {
-					cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected ) , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1193,7 +1384,8 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ; , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1207,7 +1399,8 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ] , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1216,7 +1409,8 @@ class SyntaxAnalysis {
 			&& currentToken == "8" || currentToken == "20" ) {
 			return;
 		} else {
-			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -1240,7 +1434,8 @@ class SyntaxAnalysis {
 				expression_prime(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected  ) , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected  ) , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1250,7 +1445,7 @@ class SyntaxAnalysis {
 			arithmetic_expression_prime(currentToken);
 			expression_prime(currentToken);
 			return;
-		}
+		} 
 
 	}
 
@@ -1294,7 +1489,8 @@ class SyntaxAnalysis {
 		if( currentToken == "23" || currentToken == "20" ) {
 			return;
 		} else {
-			cout << "Syntax Error: Expected  ) , got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected  ) , got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 	}
 
@@ -1316,7 +1512,8 @@ class SyntaxAnalysis {
 				arithmetic_expression_prime(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected  ) , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected  ) , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1349,7 +1546,8 @@ class SyntaxAnalysis {
 			currentToken == "20" || currentToken == "21" ) {
 			return;
 		} else {
-			cout << "Syntax Error: Expected either <=, <, >, >=, ==, !=, ], ), or ; , got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected either <=, <, >, >=, ==, !=, ], ), or ; , got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 
 	}
@@ -1370,7 +1568,8 @@ class SyntaxAnalysis {
 				term_prime(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ) , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1402,7 +1601,8 @@ class SyntaxAnalysis {
 			currentToken == "15" || currentToken == "25" || currentToken == "23" || currentToken == "21" ) {
 			return;
 		} else {
-			cout << "Syntax Error: Expected either -, +, ;, <=, <, >, >=, ==, !=, ], ), , , got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected either -, +, ;, <=, <, >, >=, ==, !=, ], ), , , got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
 
 	}
@@ -1421,7 +1621,8 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ) , got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1438,6 +1639,9 @@ class SyntaxAnalysis {
 			if( currentToken == "25" ) {
 				getNextToken(currentToken);
 				return;
+			} else {
+				cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1454,7 +1658,8 @@ class SyntaxAnalysis {
 
 			return;
 		} else {
-			cout << "Syntax Error: Expected either *, /, -, +, <=, <, >, >=, ==, !=, ;, ], ), or , got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected either *, /, -, +, <=, <, >, >=, ==, !=, ;, ], ), or , got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}   
 	}
 
@@ -1469,7 +1674,8 @@ class SyntaxAnalysis {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1485,10 +1691,12 @@ class SyntaxAnalysis {
 					getNextToken(currentToken);
 					return;
 				} else {
-					cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+					cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+				cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+				abort();
 			}
 		}
 
@@ -1521,13 +1729,12 @@ class SyntaxAnalysis {
 		if( currentToken == "23") {
 			return;
 		} else {
-			cout << "Syntax Error: Expected ), got: " + currentToken << "\n";
+			cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+			abort();
 		}
-	}	
+	}
 
 };
-
-
 
 
 int main() {

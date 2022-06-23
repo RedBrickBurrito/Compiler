@@ -15,6 +15,11 @@ class HashEntry {
 		int tokenId;
 		string content;
 		int slot;
+		int numberOfArgs = 0;
+		bool variable;
+		bool function;
+		bool global;
+		bool local;
 	public:
 		/**
 		 * This function is a constructor for the HashEntry class
@@ -23,10 +28,15 @@ class HashEntry {
 		 * @param content The content of the token.
 		 * @param slot The slot number of the hash table.
 		 */
-		HashEntry(int tokenId, string content, int slot) {
+		HashEntry(int tokenId, string content, int slot, int numberOfArgs , bool variable, bool function, bool global, bool local) {
 			this->tokenId = tokenId;
 			this->content = content;
 			this->slot = slot;
+			this->numberOfArgs = numberOfArgs;
+			this->variable = variable;
+			this->function = function;
+			this->global = global;
+			this->local = local;
 		}
 
 		/**
@@ -56,12 +66,102 @@ class HashEntry {
 			return slot;
 		}
 
+		/**
+		 * It returns the value of the number of args.
+		 * 
+		 * @return The number of args.
+		 */
+		int getNumberOfArgs() {
+			return numberOfArgs;
+		}
+
+		/**
+		 * This function returns the value of the variable property
+		 * 
+		 * @return The variable property of the class.
+		 */
+		bool getVariableProperty() {
+			return variable;
+		}
+
+		/**
+		 * This function returns a boolean value that is true if the function is a function, and false if it
+		 * is not a function
+		 * 
+		 * @return The function property of the object.
+		 */
+		bool getFunctionProperty() {
+			return function;
+		}
+
+		/**
+		 * This function returns the value of the global property
+		 * 
+		 * @return The value of the global variable.
+		 */
+		bool getGlobalProperty() {
+			return global;
+		}
+
+		/**
+		 * This function returns the value of the local property
+		 * 
+		 * @return The local variable is being returned.
+		 */
+		bool getLocalProperty() {
+			return local;
+		}
+
+		void setNumberOfArgs(int numberOfArgs) {
+			this->numberOfArgs = numberOfArgs;
+		}
+
+		/**
+		 * This function sets the variable property of the object to the value of the variable parameter
+		 * 
+		 * @param variable If true, the property is a variable. If false, it's a constant.
+		 */
+		void setVariableProperty(bool variable) {
+			this->variable = variable;
+		}
+
+		/**
+		 * This function sets the function property of the object to the value of the function parameter
+		 * 
+		 * @param function Whether or not the property is a function.
+		 */
+		void setFunctionProperty(bool function) {
+			this->function = function;
+		}
+
+		/**
+		 * It sets the global property of the class.
+		 * 
+		 * @param global If true, the property will be set on the global object. If false, it will be set on
+		 * the current object.
+		 */
+		void setGlobalProperty(bool global) {
+			this->global = global;
+		}
+
+		/**
+		 * This function sets the local property of the object to the value of the local parameter
+		 * 
+		 * @param local If true, the property is local to the object. If false, the property is global.
+		 */
+		void setLocalProperty(bool local) {
+			this->local = local;
+		}
 
 };
 
 /* This class is used to store the symbol table. It uses a hash table to store the symbol table */
 class UnorderedHashTable {
 	private:
+		int index = 0;
+		/* Create two array, one for storing the hashes, and the other for storing the content string */
+		long long hashArr[1000];
+		string contentArr[1000];
 		/* Creating a pointer to a pointer to a HashEntry. */
 		HashEntry **table;
 
@@ -186,8 +286,10 @@ class UnorderedHashTable {
 		 * @param content the string that is being hashed
 		 * @param slot the slot in the table that the entry is being inserted into.
 		 */
-		void insert(int tokenId, string content,int slot) {
+		void insert(int tokenId, string content,int slot,int numberOfArgs , bool variable, bool function, bool global, bool local ) {
 			long long hash = createHash(tokenId, content);
+			hashArr[index] = hash;
+			contentArr[index] = content;
 
 			checkCollisions(hash, slot);
 
@@ -195,7 +297,123 @@ class UnorderedHashTable {
 				delete table[hash];
 			}
 
-			table[hash] = new HashEntry(tokenId,content, slot);
+			table[hash] = new HashEntry(tokenId,content, slot, numberOfArgs, variable, function, global, local );
+			index++;
+		}
+
+		/**
+		 * It prints the hash table
+		 * 
+		 */
+		void printTable() {
+			int arraySize = sizeof(hashArr)/sizeof(hashArr[0]);
+			cout << "------------------- ID'S HASH TABLE ---------------------------" << "\n";
+			for(int i = 0; i < arraySize; i++) {
+				// check if we have reached the end of the hash table hash numbers
+				if(hashArr[i] == 0) {
+					return;
+				}
+
+				cout << table[hashArr[i]]->getContent() << " --> " << "Variable : " << table[hashArr[i]]->getVariableProperty() <<
+						" " << "Function : " << table[hashArr[i]]->getFunctionProperty() << " " << "Global : " << table[hashArr[i]]->getGlobalProperty() <<
+						" " << "Local : " << table[hashArr[i]]->getLocalProperty() << " " << "Args : " << table[hashArr[i]]->getNumberOfArgs() << "\n";
+			}
+		}
+
+		/**
+		 * This function checks if the current token is the main keyword
+		 * 
+		 * @param index the index of the token in the contentArr
+		 * 
+		 * @return A boolean value.
+		 */
+		bool getMainKeyword(int index) {
+			int tokenId = 28;
+			long long hash = createHash(tokenId, contentArr[index]);
+
+			if(table[hash] != nullptr) {
+				string main = table[hash]->getContent();
+				if(main == "main") {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		/**
+		 * This function sets the number of args property value
+		 * 
+		 * @param index the index of the content in the contentArr
+		 * @param numberOfArgs number of args
+		 */
+		void setNumberOfArgsProperty(int index, int numberOfArgs) {
+			int tokenId = 28;
+			long long hash = createHash(tokenId, contentArr[index]);
+
+			if(table[hash] != nullptr) {
+				table[hash]->setNumberOfArgs(numberOfArgs);
+			}	
+		}
+
+		/**
+		 * This function sets the variable property of a variable in the symbol table
+		 * 
+		 * @param index the index of the content in the contentArr
+		 * @param variable true if the variable is a variable, false if it's a constant
+		 */
+		void setVariableProperty(int index, bool variable) {
+			int tokenId = 28;
+			long long hash = createHash(tokenId, contentArr[index]);
+
+			if(table[hash] != nullptr) {
+				table[hash]->setVariableProperty(variable);
+			}	
+		}
+
+		/**
+		 * This function sets the function property of a symbol table entry
+		 * 
+		 * @param index the index of the token in the contentArr
+		 * @param function true if the identifier is a function, false if it's a variable
+		 */
+		void setFunctionProperty(int index, bool function) {
+			int tokenId = 28;
+			long long hash = createHash(tokenId, contentArr[index]);
+
+			if(table[hash] != nullptr) {
+				table[hash]->setFunctionProperty(function);
+			}	
+		}
+
+		/**
+		 * This function sets the global property of a variable
+		 * 
+		 * @param index the index of the content in the contentArr
+		 * @param global true if the variable is global, false if it's local
+		 */
+		void setGlobalProperty(int index, bool global) {
+			int tokenId = 28;
+			long long hash = createHash(tokenId, contentArr[index]);
+
+			if(table[hash] != nullptr) {
+				table[hash]->setGlobalProperty(global);
+			}	
+		}
+
+		/**
+		 * It sets the local property of the variable at the given index to the given value.
+		 * 
+		 * @param index the index of the content in the contentArr
+		 * @param local true if the variable is local, false if it's global
+		 */
+		void setLocalProperty(int index, bool local) {
+			int tokenId = 28;
+			long long hash = createHash(tokenId, contentArr[index]);
+
+			if(table[hash] != nullptr) {
+				table[hash]->setLocalProperty(local);
+			}	
 		}
 };
 
