@@ -14,5 +14,7 @@ sample_program.txt
 operation.txt
 operations.txt
 scannerOutput.txt
+tokenLinePosition.txt
+compiler
 .vscode
 build
