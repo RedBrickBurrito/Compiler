@@ -5,6 +5,7 @@
 #include "unordered_hash_table.h"
 using namespace std;
 
+/* Creating a symbol table for identifiers. */
 UnorderedHashTable identifiersSymbolTable;
 
 class LexicalAnalyzer {
@@ -731,505 +732,519 @@ class SyntaxAnalysis {
 		bool isMain = false;
 		int numOfArgs = 1;
 	public:
-	ifstream file;
-	bool matched = false;
-	SyntaxAnalysis() {
-		file.open("scannerOutput.txt");
-	}
-
-	string getTokenString(string currentToken) {
-		int token = stoi(currentToken);
-
-		switch (token)
-		{
-		case 1:
-			return "if";
-			break;
-		case 2:
-			return "else";
-			break;
-		case 3:
-			return "int";
-			break;
-		case 4:
-			return "void";
-			break;
-		case 5:
-			return "return";
-			break;
-		case 6:
-			return "while";
-			break;
-		case 7:
-			return "input";
-			break;
-		case 8:
-			return "output";
-			break;
-		case 9:
-			return "/";
-			break;
-		case 10:
-			return "+";
-			break;
-		case 11:
-			return "-";
-			break;
-		case 12:
-			return "*";
-			break;
-		case 13:
-			return "=";
-			break;
-		case 14:
-			return "==";
-			break;
-		case 15:
-			return "!=";
-			break;
-		case 16:
-			return "<";
-			break;
-		case 17:
-			return "<=";
-			break;
-		case 18:
-			return ">";
-			break;
-		case 19:
-			return ">=";
-			break;
-		case 20:
-			return ";";
-			break;
-		case 21:
-			return ",";
-			break;
-		case 22:
-			return "(";
-			break;
-		case 23:
-			return ")";
-			break;
-		case 24:
-			return "[";
-			break;
-		case 25:
-			return "]";
-			break;
-		case 26:
-			return "{";
-			break;
-		case 27:
-			return "}";
-			break;
-		case 28:
-			return "ID";
-			break;
-		case 29:
-			return "NUM";
-			break;
+		ifstream file;
+		bool matched = false;
+		SyntaxAnalysis() {
+			file.open("scannerOutput.txt");
 		}
-	}
 
-	/**
-	 * This function reads the next token from the input file and returns it
-	 * 
-	 * @param currentToken The current token that is being read from the file.
-	 * 
-	 * @return The next token in the file.
-	 */
-	string getNextToken(string &currentToken) {
-		currentToken = "";
+		string getTokenString(string currentToken) {
+			int token = stoi(currentToken);
 
-		while(getline(file, currentToken, '\n')) {
-			// check if the input is an identifier, or a number
-			if(currentToken.substr(0,2) == "28" || currentToken.substr(0,2) == "29") {
-				currentTokenTableIndex = "";
-				int position = currentToken.find(" ");
+			switch (token)
+			{
+			case 1:
+				return "if";
+				break;
+			case 2:
+				return "else";
+				break;
+			case 3:
+				return "int";
+				break;
+			case 4:
+				return "void";
+				break;
+			case 5:
+				return "return";
+				break;
+			case 6:
+				return "while";
+				break;
+			case 7:
+				return "input";
+				break;
+			case 8:
+				return "output";
+				break;
+			case 9:
+				return "/";
+				break;
+			case 10:
+				return "+";
+				break;
+			case 11:
+				return "-";
+				break;
+			case 12:
+				return "*";
+				break;
+			case 13:
+				return "=";
+				break;
+			case 14:
+				return "==";
+				break;
+			case 15:
+				return "!=";
+				break;
+			case 16:
+				return "<";
+				break;
+			case 17:
+				return "<=";
+				break;
+			case 18:
+				return ">";
+				break;
+			case 19:
+				return ">=";
+				break;
+			case 20:
+				return ";";
+				break;
+			case 21:
+				return ",";
+				break;
+			case 22:
+				return "(";
+				break;
+			case 23:
+				return ")";
+				break;
+			case 24:
+				return "[";
+				break;
+			case 25:
+				return "]";
+				break;
+			case 26:
+				return "{";
+				break;
+			case 27:
+				return "}";
+				break;
+			case 28:
+				return "ID";
+				break;
+			case 29:
+				return "NUM";
+				break;
+			}
+		}
 
-				currentTokenTableIndex = currentToken.substr(position, currentToken.length());
-				currentToken = currentToken.substr(0, position);
+		/**
+		 * This function reads the next token from the input file and returns it
+		 * 
+		 * @param currentToken The current token that is being read from the file.
+		 * 
+		 * @return The next token in the file.
+		 */
+		string getNextToken(string &currentToken) {
+			currentToken = "";
+
+			while(getline(file, currentToken, '\n')) {
+				// check if the input is an identifier, or a number
+				if(currentToken.substr(0,2) == "28" || currentToken.substr(0,2) == "29") {
+					currentTokenTableIndex = "";
+					int position = currentToken.find(" ");
+
+					currentTokenTableIndex = currentToken.substr(position, currentToken.length());
+					currentToken = currentToken.substr(0, position);
+				} 
+
+				return currentToken;
+			}
+		}
+
+		/**
+		 * The function starts by getting the first token from the lexical analyzer. Then it calls the program
+		 * function, which is the first non-terminal in the grammar. If the current token is the end of file
+		 * token, then the syntax analysis is successful. Otherwise, it's a syntax error
+		 */
+		void startSyntaxAnalysis() {
+
+			string currentToken = "";
+
+			getNextToken(currentToken);
+
+			program(currentToken);
+
+			// check if main is in function
+			if(!isMain) {
+				cout << "Syntax Error: main is not declared" << "\n";
+				abort();
+			}
+
+			if(currentToken == "$") {
+				cout << "Syntax Analysis OK" << "\n";
+				// print the table modifications
+				identifiersSymbolTable.printTable();
+				abort();
+			} else {
+				cout << "Syntax Analysis ERROR" << "\n";
+				abort();
+			}
+
+			
+		}
+
+		void program(string &currentToken) {
+			if( currentToken == "3" ) {
+				getNextToken(currentToken);
+				if( currentToken == "28" ) {
+					functionTokenIndex = currentTokenTableIndex;
+					getNextToken(currentToken);
+					declaration(currentToken);
+					program(currentToken);
+				} else {
+					cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
 			} 
 
-			return currentToken;
-		}
-	}
-
-	/**
-	 * The function starts by getting the first token from the lexical analyzer. Then it calls the program
-	 * function, which is the first non-terminal in the grammar. If the current token is the end of file
-	 * token, then the syntax analysis is successful. Otherwise, it's a syntax error
-	 */
-	void startSyntaxAnalysis() {
-
-		string currentToken = "";
-
-		getNextToken(currentToken);
-
-		program(currentToken);
-
-		// check if main is in function
-		if(!isMain) {
-			cout << "Syntax Error: main is not declared" << "\n";
-			abort();
-		}
-
-		if(currentToken == "$") {
-			cout << "Syntax Analysis OK" << "\n";
-			// print the table modifications
-			identifiersSymbolTable.printTable();
-			abort();
-		} else {
-			cout << "Syntax Analysis ERROR" << "\n";
-			abort();
-		}
-
-		
-	}
-
-	void program(string &currentToken) {
-		if( currentToken == "3" ) {
-			getNextToken(currentToken);
-			if( currentToken == "28" ) {
-				functionTokenIndex = currentTokenTableIndex;
+			if( currentToken == "4" ) {
 				getNextToken(currentToken);
-				declaration(currentToken);
-				program(currentToken);
-			} else {
-				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
-				abort();
+				if( currentToken == "28") {
+					functionTokenIndex = currentTokenTableIndex;
+					identifiersSymbolTable.setFunctionProperty( stoi(currentTokenTableIndex) - 1, true);
+					identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
+					// check if identifier is main
+					if( identifiersSymbolTable.getMainKeyword(stoi(currentTokenTableIndex) - 1)) {
+						isMain = true;
+					}
+					getNextToken(currentToken);
+					if( currentToken == "22") {
+						getNextToken(currentToken);
+						params(currentToken);
+						if(currentToken == "23") {
+							getNextToken(currentToken);
+							compound_stmt(currentToken);
+							program(currentToken);
+						} else {
+							cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
+							abort();
+						}
+
+					} else {
+						cout << "Syntax Error: Expected ( , got: " + getTokenString(currentToken) << "\n";
+						abort();
+					}
+				} else {
+					cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+			
+			if( currentToken == "$") {
+				return;
 			}
 		}
 
-		if( currentToken == "4" ) {
-			getNextToken(currentToken);
-			if( currentToken == "28") {
-				functionTokenIndex = currentTokenTableIndex;
+		void declaration(string &currentToken)	{
+			if( currentToken == "20") {
+				identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+				identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
+				getNextToken(currentToken);
+				return;
+			}
+
+			if(currentToken == "24") {
+				getNextToken(currentToken);
+				if( currentToken == "29" ) {
+					getNextToken(currentToken);
+					if( currentToken == "25") {
+						getNextToken(currentToken);
+						if( currentToken == "20") {
+							identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+							identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
+							getNextToken(currentToken);
+							return ;
+						} else {
+							cout << "Syntax Error: Expected ;, got: " + getTokenString(currentToken) << "\n";
+							abort();
+						}
+					} else {
+						cout << "Syntax Error: Expected ], got: " + getTokenString(currentToken) << "\n";
+						abort();
+					}
+				} else {
+					cout << "Syntax Error: Expected NUM, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "22" ) {
 				identifiersSymbolTable.setFunctionProperty( stoi(currentTokenTableIndex) - 1, true);
 				identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
-				// check if identifier is main
-				if( identifiersSymbolTable.getMainKeyword(stoi(currentTokenTableIndex) - 1)) {
-					isMain = true;
-				}
 				getNextToken(currentToken);
-				if( currentToken == "22") {
+				params(currentToken);
+				numOfArgs = 1;
+				if( currentToken == "23") {
 					getNextToken(currentToken);
-					params(currentToken);
-					if(currentToken == "23") {
-						getNextToken(currentToken);
-						compound_stmt(currentToken);
-						program(currentToken);
-					} else {
-						cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
-						abort();
-					}
-
+					compound_stmt(currentToken);
+					return;
 				} else {
-					cout << "Syntax Error: Expected ( , got: " + getTokenString(currentToken) << "\n";
+					cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
 					abort();
 				}
 			} else {
-				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
+
 		}
 
-		if( currentToken == "$") {
-			return;
-		}
-	}
-
-	void declaration(string &currentToken)	{
-		if( currentToken == "20") {
-			identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
-			identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
-			getNextToken(currentToken);
-			return;
-		}
-
-		if(currentToken == "24") {
-			getNextToken(currentToken);
-			if( currentToken == "29" ) {
-				getNextToken(currentToken);
-				if( currentToken == "25") {
-					getNextToken(currentToken);
-					if( currentToken == "20") {
-						identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
-						identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
-						getNextToken(currentToken);
-						return ;
-					} else {
-						cout << "Syntax Error: Expected ;, got: " + getTokenString(currentToken) << "\n";
-						abort();
-					}
-				} else {
-					cout << "Syntax Error: Expected ], got: " + getTokenString(currentToken) << "\n";
-					abort();
-				}
-			} else {
-				cout << "Syntax Error: Expected NUM, got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		}
-
-		if( currentToken == "22" ) {
-			identifiersSymbolTable.setFunctionProperty( stoi(currentTokenTableIndex) - 1, true);
-			identifiersSymbolTable.setGlobalProperty( stoi(currentTokenTableIndex) - 1, true);
-			getNextToken(currentToken);
-			params(currentToken);
-			numOfArgs = 1;
-			if( currentToken == "23") {
-				getNextToken(currentToken);
-				compound_stmt(currentToken);
-				return;
-			} else {
-				cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		} else {
-			cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-
-	}
-
-	void params(string &currentToken) {
-		if( currentToken == "3") {
-			getNextToken(currentToken);
-			if( currentToken == "28" ) {
-				getNextToken(currentToken);
-				param(currentToken);
-				param_list(currentToken);
-				return;
-			} else {
-				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		}
-
-		if( currentToken == "4") {
-			getNextToken(currentToken);
-			return;
-		} else {
-			cout << "Syntax Error: Expected void, got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
-
-	void param_list(string &currentToken) {
-		if( currentToken == "21") {
-			numOfArgs++;
-			identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
-			identifiersSymbolTable.setLocalProperty( stoi(currentTokenTableIndex) - 1, true);
-			identifiersSymbolTable.setNumberOfArgsProperty( stoi(functionTokenIndex) - 1, numOfArgs );
-			getNextToken(currentToken);
-			if( currentToken == "3" ) {
+		void params(string &currentToken) {
+			if( currentToken == "3") {
 				getNextToken(currentToken);
 				if( currentToken == "28" ) {
 					getNextToken(currentToken);
 					param(currentToken);
 					param_list(currentToken);
-					return ;
+					return;
 				} else {
 					cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
 					abort();
 				}
-			} else {
-				cout << "Syntax Error: Expected int, got: " + getTokenString(currentToken) << "\n";
-				abort();
 			}
-		}
 
-		if( currentToken == "23") {
-			identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
-			identifiersSymbolTable.setLocalProperty( stoi(currentTokenTableIndex) - 1, true);
-			return;
-		} else {
-			cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
-
-	void param(string &currentToken) {
-		if( currentToken == "24" ) {
-			getNextToken(currentToken);
-			if( currentToken == "25") {
-				getNextToken(currentToken);
-				return ;
-			} else {
-				cout << "Syntax Error: Expected ], got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		}
-
-		if( currentToken == "21" ) {
-			return;
-		}
-
-		if( currentToken == "23") {
-			return;
-		} else {
-			cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
-
-	void compound_stmt(string &currentToken) {
-		if( currentToken == "26") {
-			getNextToken(currentToken);
-			local_declarations(currentToken);
-			statement_list(currentToken);
-			if( currentToken == "27") {
+			if( currentToken == "4") {
 				getNextToken(currentToken);
 				return;
 			} else {
-				cout << "Syntax Error: Expected }, got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected void, got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
-		} else {
-			cout << "Syntax Error: Expected {, got: " + getTokenString(currentToken) << "\n";
-			abort();
 		}
-	}
 
-	void local_declarations(string &currentToken) {
-		if( currentToken == "3") {
-			getNextToken(currentToken);
-			if( currentToken == "28" ) {
+		void param_list(string &currentToken) {
+			if( currentToken == "21") {
+				numOfArgs++;
 				identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
 				identifiersSymbolTable.setLocalProperty( stoi(currentTokenTableIndex) - 1, true);
+				identifiersSymbolTable.setNumberOfArgsProperty( stoi(functionTokenIndex) - 1, numOfArgs );
 				getNextToken(currentToken);
-				local_declarations_prime(currentToken);
+				if( currentToken == "3" ) {
+					getNextToken(currentToken);
+					if( currentToken == "28" ) {
+						getNextToken(currentToken);
+						param(currentToken);
+						param_list(currentToken);
+						return ;
+					} else {
+						cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+						abort();
+					}
+				} else {
+					cout << "Syntax Error: Expected int, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "23") {
+				identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+				identifiersSymbolTable.setLocalProperty( stoi(currentTokenTableIndex) - 1, true);
 				return;
 			} else {
-				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
 		}
 
-		if( currentToken == "28" || currentToken == "26" || currentToken == "1" || 
-			currentToken == "6"  || currentToken == "5"  || currentToken == "7" || 
-			currentToken == "8" || currentToken == "27" ) {
-			
-			return;
-		} else {
-			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
-
-	void local_declarations_prime(string &currentToken) {
-		if( currentToken == "20") {
-			getNextToken(currentToken);
-			local_declarations(currentToken);
-			return;
-		}
-
-		if( currentToken == "24") {
-			getNextToken(currentToken);
-			if( currentToken == "29" ) {
+		void param(string &currentToken) {
+			if( currentToken == "24" ) {
 				getNextToken(currentToken);
 				if( currentToken == "25") {
 					getNextToken(currentToken);
-					if( currentToken == "20") {
+					return ;
+				} else {
+					cout << "Syntax Error: Expected ], got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "21" ) {
+				return;
+			}
+
+			if( currentToken == "23") {
+				return;
+			} else {
+				cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+				abort();
+			}
+		}
+
+		void compound_stmt(string &currentToken) {
+			if( currentToken == "26") {
+				getNextToken(currentToken);
+				local_declarations(currentToken);
+				statement_list(currentToken);
+				if( currentToken == "27") {
+					getNextToken(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected }, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			} else {
+				cout << "Syntax Error: Expected {, got: " + getTokenString(currentToken) << "\n";
+				abort();
+			}
+		}
+
+		void local_declarations(string &currentToken) {
+			if( currentToken == "3") {
+				getNextToken(currentToken);
+				if( currentToken == "28" ) {
+					identifiersSymbolTable.setVariableProperty( stoi(currentTokenTableIndex) - 1, true);
+					identifiersSymbolTable.setLocalProperty( stoi(currentTokenTableIndex) - 1, true);
+					getNextToken(currentToken);
+					local_declarations_prime(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "28" || currentToken == "26" || currentToken == "1" || 
+				currentToken == "6"  || currentToken == "5"  || currentToken == "7" || 
+				currentToken == "8" || currentToken == "27" ) {
+				
+				return;
+			} else {
+				cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
+				abort();
+			}
+		}
+
+		void local_declarations_prime(string &currentToken) {
+			if( currentToken == "20") {
+				getNextToken(currentToken);
+				local_declarations(currentToken);
+				return;
+			}
+
+			if( currentToken == "24") {
+				getNextToken(currentToken);
+				if( currentToken == "29" ) {
+					getNextToken(currentToken);
+					if( currentToken == "25") {
 						getNextToken(currentToken);
-						local_declarations(currentToken);
+						if( currentToken == "20") {
+							getNextToken(currentToken);
+							local_declarations(currentToken);
+							return;
+						} else {
+							cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+							abort();
+						}
+					} else {
+						cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+						abort();
+					}
+				} else {
+					cout << "Syntax Error: Expected NUM , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+		}
+
+		void statement_list(string &currentToken) {
+			if( currentToken == "28" ) {
+				getNextToken(currentToken);
+				statement(currentToken);
+				statement_list(currentToken);
+				return;
+			}
+
+			if( currentToken == "26") {
+				getNextToken(currentToken);
+				local_declarations(currentToken);
+				statement_list(currentToken);
+				if( currentToken == "27") {
+					getNextToken(currentToken);
+					statement_list(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected }, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "1" ) {
+				getNextToken(currentToken);
+				if( currentToken == "22" ) {
+					getNextToken(currentToken);
+					expression(currentToken);
+					if( currentToken == "23" ) {
+						getNextToken(currentToken);
+						statement_list(currentToken);
+						else_part(currentToken);
+						statement_list(currentToken);
+						return;
+					} else {
+						cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+						abort();
+					}
+				} else {
+					cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "6") {
+				getNextToken(currentToken);
+				if( currentToken == "22") {
+					getNextToken(currentToken);
+					expression(currentToken);
+					if( currentToken == "23" ) {
+						getNextToken(currentToken);
+						statement_list(currentToken);
+						statement_list(currentToken);
+						return;
+					} else {
+						cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+						abort();
+					}
+				} else {
+					cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "5" ) {
+				getNextToken(currentToken);
+				return_stmt(currentToken);
+				statement_list(currentToken);
+				return;
+			}
+
+			if( currentToken == "7") {
+				getNextToken(currentToken);
+				if( currentToken == "28" ) {
+					getNextToken(currentToken);
+					var(currentToken);
+					if( currentToken == "20" ) {
+						getNextToken(currentToken);
+						statement_list(currentToken);
 						return;
 					} else {
 						cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
 						abort();
 					}
 				} else {
-					cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+					cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
 					abort();
 				}
-			} else {
-				cout << "Syntax Error: Expected NUM , got: " + getTokenString(currentToken) << "\n";
-				abort();
 			}
-		} else {
-			cout << "Syntax Error: Expected [ , got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
 
-	void statement_list(string &currentToken) {
-		if( currentToken == "28" ) {
-			getNextToken(currentToken);
-			statement(currentToken);
-			statement_list(currentToken);
-			return;
-		}
-
-		if( currentToken == "26") {
-			getNextToken(currentToken);
-			local_declarations(currentToken);
-			statement_list(currentToken);
-			if( currentToken == "27") {
-				getNextToken(currentToken);
-				statement_list(currentToken);
-				return;
-			} else {
-				cout << "Syntax Error: Expected }, got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		}
-
-		if( currentToken == "1" ) {
-			getNextToken(currentToken);
-			if( currentToken == "22" ) {
+			if( currentToken == "8") {
 				getNextToken(currentToken);
 				expression(currentToken);
-				if( currentToken == "23" ) {
-					getNextToken(currentToken);
-					statement_list(currentToken);
-					else_part(currentToken);
-					statement_list(currentToken);
-					return;
-				} else {
-					cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
-					abort();
-				}
-			} else {
-				cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		}
-
-		if( currentToken == "6") {
-			getNextToken(currentToken);
-			if( currentToken == "22") {
-				getNextToken(currentToken);
-				expression(currentToken);
-				if( currentToken == "23" ) {
-					getNextToken(currentToken);
-					statement_list(currentToken);
-					statement_list(currentToken);
-					return;
-				} else {
-					cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
-					abort();
-				}
-			} else {
-				cout << "Syntax Error: Expected (, got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		}
-
-		if( currentToken == "5" ) {
-			getNextToken(currentToken);
-			return_stmt(currentToken);
-			statement_list(currentToken);
-			return;
-		}
-
-		if( currentToken == "7") {
-			getNextToken(currentToken);
-			if( currentToken == "28" ) {
-				getNextToken(currentToken);
-				var(currentToken);
-				if( currentToken == "20" ) {
+				if( currentToken == "20") {
 					getNextToken(currentToken);
 					statement_list(currentToken);
 					return;
@@ -1237,42 +1252,114 @@ class SyntaxAnalysis {
 					cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
 					abort();
 				}
+			}
+
+			if( currentToken == "27" ) {
+				return;
 			} else {
-				cout << "Syntax Error: Expected ID, got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected } , got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
 		}
 
-		if( currentToken == "8") {
-			getNextToken(currentToken);
-			expression(currentToken);
-			if( currentToken == "20") {
+		void statement(string &currentToken) {
+			if( currentToken == "24" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "25") {
+					getNextToken(currentToken);
+					if( currentToken == "13") {
+						getNextToken(currentToken);
+						expression(currentToken);
+						if( currentToken == "20" ) {
+							getNextToken(currentToken);
+							return;
+						} else {
+							cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+							abort();
+						}
+					} else {
+						cout << "Syntax Error: Expected = , got: " + getTokenString(currentToken) << "\n";
+						abort();
+					}
+				} else {
+					cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "13" ) {
+				getNextToken(currentToken);
+				expression(currentToken);
+				if( currentToken == "20" ) {
+					getNextToken(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "22" ) {
+				getNextToken(currentToken);
+				call_stmt(currentToken);
+				if( currentToken == "20" ) {
+					getNextToken(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				} 
+			}
+
+		}
+
+		void else_part(string &currentToken) {
+			if( currentToken == "2") {
 				getNextToken(currentToken);
 				statement_list(currentToken);
 				return;
+			}
+
+			if( currentToken == "28" || currentToken == "26" || currentToken == "1" || 
+				currentToken == "6"  || currentToken == "5"  || currentToken == "7"
+				&& currentToken == "8" || currentToken == "27" ) {
+				return;
 			} else {
-				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
 		}
 
-		if( currentToken == "27" ) {
-			return;
-		} else {
-			cout << "Syntax Error: Expected } , got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
-
-	void statement(string &currentToken) {
-		if( currentToken == "24" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "25") {
+		void return_stmt(string &currentToken) {
+			if( currentToken == "20" ) {
 				getNextToken(currentToken);
-				if( currentToken == "13") {
+				return;
+			}
+
+			if( currentToken == "28" ) {
+				getNextToken(currentToken);
+				factor_prime(currentToken);
+				term_prime(currentToken);
+				arithmetic_expression_prime(currentToken);
+				expression_prime(currentToken);
+				if( currentToken == "20" ) {
 					getNextToken(currentToken);
-					expression(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "22" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "23" ) {
+					getNextToken(currentToken);
+					term_prime(currentToken);
+					arithmetic_expression_prime(currentToken);
+					expression_prime(currentToken);
 					if( currentToken == "20" ) {
 						getNextToken(currentToken);
 						return;
@@ -1281,83 +1368,12 @@ class SyntaxAnalysis {
 						abort();
 					}
 				} else {
-					cout << "Syntax Error: Expected = , got: " + getTokenString(currentToken) << "\n";
+					cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
 					abort();
 				}
-			} else {
-				cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
-				abort();
 			}
-		}
 
-		if( currentToken == "13" ) {
-			getNextToken(currentToken);
-			expression(currentToken);
-			if( currentToken == "20" ) {
-				getNextToken(currentToken);
-				return;
-			} else {
-				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		}
-
-		if( currentToken == "22" ) {
-			getNextToken(currentToken);
-			call_stmt(currentToken);
-			if( currentToken == "20" ) {
-				getNextToken(currentToken);
-				return;
-			} else {
-				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
-				abort();
-			} 
-		}
-
-	}
-
-	void else_part(string &currentToken) {
-		if( currentToken == "2") {
-			getNextToken(currentToken);
-			statement_list(currentToken);
-			return;
-		}
-
-		if( currentToken == "28" || currentToken == "26" || currentToken == "1" || 
-			currentToken == "6"  || currentToken == "5"  || currentToken == "7"
-			&& currentToken == "8" || currentToken == "27" ) {
-			return;
-		} else {
-			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
-
-	void return_stmt(string &currentToken) {
-		if( currentToken == "20" ) {
-			getNextToken(currentToken);
-			return;
-		}
-
-		if( currentToken == "28" ) {
-			getNextToken(currentToken);
-			factor_prime(currentToken);
-			term_prime(currentToken);
-			arithmetic_expression_prime(currentToken);
-			expression_prime(currentToken);
-			if( currentToken == "20" ) {
-				getNextToken(currentToken);
-				return;
-			} else {
-				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
-				abort();
-			}
-		}
-
-		if( currentToken == "22" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "23" ) {
+			if( currentToken == "29" ) {
 				getNextToken(currentToken);
 				term_prime(currentToken);
 				arithmetic_expression_prime(currentToken);
@@ -1369,321 +1385,286 @@ class SyntaxAnalysis {
 					cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
 					abort();
 				}
-			} else {
-				cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
-				abort();
 			}
+
 		}
 
-		if( currentToken == "29" ) {
-			getNextToken(currentToken);
-			term_prime(currentToken);
-			arithmetic_expression_prime(currentToken);
-			expression_prime(currentToken);
-			if( currentToken == "20" ) {
+		void var(string &currentToken) {
+			if( currentToken == "24" ) {
 				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "25" ) {
+					getNextToken(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "28" || currentToken == "26" || currentToken == "1" || 
+				currentToken == "6"  || currentToken == "5"  || currentToken == "7"
+				&& currentToken == "8" || currentToken == "20" ) {
 				return;
 			} else {
-				cout << "Syntax Error: Expected ; , got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
 		}
 
-	}
-
-	void var(string &currentToken) {
-		if( currentToken == "24" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "25" ) {
+		void expression(string &currentToken) {
+			if( currentToken == "28" ) {
 				getNextToken(currentToken);
+				factor_prime(currentToken);
+				term_prime(currentToken);
+				arithmetic_expression_prime(currentToken);
+				expression_prime(currentToken);
 				return;
-			} else {
-				cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
-				abort();
 			}
-		}
 
-		if( currentToken == "28" || currentToken == "26" || currentToken == "1" || 
-			currentToken == "6"  || currentToken == "5"  || currentToken == "7"
-			&& currentToken == "8" || currentToken == "20" ) {
-			return;
-		} else {
-			cout << "Syntax Error: Expected either ID, { , if, while, return, input, output, or }, got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
+			if( currentToken == "22" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "23" ) {
+					getNextToken(currentToken);
+					term_prime(currentToken);
+					arithmetic_expression_prime(currentToken);
+					expression_prime(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected  ) , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
 
-	void expression(string &currentToken) {
-		if( currentToken == "28" ) {
-			getNextToken(currentToken);
-			factor_prime(currentToken);
-			term_prime(currentToken);
-			arithmetic_expression_prime(currentToken);
-			expression_prime(currentToken);
-			return;
-		}
-
-		if( currentToken == "22" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "23" ) {
+			if( currentToken == "29" ) {
 				getNextToken(currentToken);
 				term_prime(currentToken);
 				arithmetic_expression_prime(currentToken);
 				expression_prime(currentToken);
 				return;
+			} 
+
+		}
+
+		void expression_prime(string &currentToken) {
+			if( currentToken == "17" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				return;
+			}
+
+			if( currentToken == "16" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				return;
+			}
+
+			if( currentToken == "18" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				return;
+			}
+
+			if( currentToken == "19" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				return;
+			}
+
+			if( currentToken == "14" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				return;
+			}
+
+			if( currentToken == "15" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				return;
+			}
+
+			if( currentToken == "23" || currentToken == "20" ) {
+				return;
 			} else {
 				cout << "Syntax Error: Expected  ) , got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
 		}
 
-		if( currentToken == "29" ) {
-			getNextToken(currentToken);
-			term_prime(currentToken);
-			arithmetic_expression_prime(currentToken);
-			expression_prime(currentToken);
-			return;
-		} 
+		void arithmetic_expression(string &currentToken) {
+			if( currentToken == "28" ) {
+				getNextToken(currentToken);
+				factor_prime(currentToken);
+				term_prime(currentToken);
+				arithmetic_expression_prime(currentToken);
+				return;
+			}
 
-	}
+			if( currentToken == "22" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "23" ) {
+					getNextToken(currentToken);
+					term_prime(currentToken);
+					arithmetic_expression_prime(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected  ) , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
 
-	void expression_prime(string &currentToken) {
-		if( currentToken == "17" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			return;
-		}
-
-		if( currentToken == "16" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			return;
-		}
-
-		if( currentToken == "18" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			return;
-		}
-
-		if( currentToken == "19" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			return;
-		}
-
-		if( currentToken == "14" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			return;
-		}
-
-		if( currentToken == "15" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			return;
-		}
-
-		if( currentToken == "23" || currentToken == "20" ) {
-			return;
-		} else {
-			cout << "Syntax Error: Expected  ) , got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
-
-	void arithmetic_expression(string &currentToken) {
-		if( currentToken == "28" ) {
-			getNextToken(currentToken);
-			factor_prime(currentToken);
-			term_prime(currentToken);
-			arithmetic_expression_prime(currentToken);
-			return;
-		}
-
-		if( currentToken == "22" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "23" ) {
+			if( currentToken == "29" ) {
 				getNextToken(currentToken);
 				term_prime(currentToken);
 				arithmetic_expression_prime(currentToken);
 				return;
+			}
+
+		}
+
+		void arithmetic_expression_prime(string &currentToken) {
+			if( currentToken == "10" ) {
+				getNextToken(currentToken);
+				term(currentToken);
+				arithmetic_expression_prime(currentToken);
+				return;
+			}
+
+			if( currentToken == "11" ) {
+				getNextToken(currentToken);
+				term(currentToken);
+				arithmetic_expression_prime(currentToken);
+				return;
+			}
+
+			if( currentToken == "17" || currentToken == "16" || currentToken == "18" || currentToken == "19" || 
+				currentToken == "14" || currentToken == "15" || currentToken == "25" || currentToken == "23" ||
+				currentToken == "20" || currentToken == "21" ) {
+				return;
 			} else {
-				cout << "Syntax Error: Expected  ) , got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected either <=, <, >, >=, ==, !=, ], ), or ; , got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
+
 		}
 
-		if( currentToken == "29" ) {
-			getNextToken(currentToken);
-			term_prime(currentToken);
-			arithmetic_expression_prime(currentToken);
-			return;
-		}
+		void term(string &currentToken) {
+			if( currentToken == "28" ) {
+				getNextToken(currentToken);
+				factor_prime(currentToken);
+				term_prime(currentToken);
+				return;
+			}
 
-	}
+			if( currentToken == "22" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "23" ) {
+					getNextToken(currentToken);
+					term_prime(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
 
-	void arithmetic_expression_prime(string &currentToken) {
-		if( currentToken == "10" ) {
-			getNextToken(currentToken);
-			term(currentToken);
-			arithmetic_expression_prime(currentToken);
-			return;
-		}
-
-		if( currentToken == "11" ) {
-			getNextToken(currentToken);
-			term(currentToken);
-			arithmetic_expression_prime(currentToken);
-			return;
-		}
-
-		if( currentToken == "17" || currentToken == "16" || currentToken == "18" || currentToken == "19" || 
-			currentToken == "14" || currentToken == "15" || currentToken == "25" || currentToken == "23" ||
-			currentToken == "20" || currentToken == "21" ) {
-			return;
-		} else {
-			cout << "Syntax Error: Expected either <=, <, >, >=, ==, !=, ], ), or ; , got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-
-	}
-
-	void term(string &currentToken) {
-		if( currentToken == "28" ) {
-			getNextToken(currentToken);
-			factor_prime(currentToken);
-			term_prime(currentToken);
-			return;
-		}
-
-		if( currentToken == "22" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "23" ) {
+			if( currentToken == "29" ) {
 				getNextToken(currentToken);
 				term_prime(currentToken);
 				return;
-			} else {
-				cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
-				abort();
 			}
+
 		}
 
-		if( currentToken == "29" ) {
-			getNextToken(currentToken);
-			term_prime(currentToken);
-			return;
-		}
-
-	}
-
-	void term_prime(string &currentToken) {
-		if( currentToken == "12" ) {
-			getNextToken(currentToken);
-			factor(currentToken);
-			term_prime(currentToken);
-			return;
-		}
-
-		if( currentToken == "9" ) {
-			getNextToken(currentToken);
-			factor(currentToken);
-			term_prime(currentToken);
-			return;
-		}
-
-		if( currentToken == "11" || currentToken == "10" || currentToken == "20" || currentToken == "17" ||
-			currentToken == "16" || currentToken == "18" || currentToken == "19" || currentToken == "14" ||
-			currentToken == "15" || currentToken == "25" || currentToken == "23" || currentToken == "21" ) {
-			return;
-		} else {
-			cout << "Syntax Error: Expected either -, +, ;, <=, <, >, >=, ==, !=, ], ), , , got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-
-	}
-
-	void factor(string &currentToken) {
-		if( currentToken == "28" ) {
-			getNextToken(currentToken);
-			factor_prime(currentToken);
-			return;
-		}
-
-		if( currentToken == "22" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "23" ) {
+		void term_prime(string &currentToken) {
+			if( currentToken == "12" ) {
 				getNextToken(currentToken);
+				factor(currentToken);
+				term_prime(currentToken);
+				return;
+			}
+
+			if( currentToken == "9" ) {
+				getNextToken(currentToken);
+				factor(currentToken);
+				term_prime(currentToken);
+				return;
+			}
+
+			if( currentToken == "11" || currentToken == "10" || currentToken == "20" || currentToken == "17" ||
+				currentToken == "16" || currentToken == "18" || currentToken == "19" || currentToken == "14" ||
+				currentToken == "15" || currentToken == "25" || currentToken == "23" || currentToken == "21" ) {
 				return;
 			} else {
-				cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected either -, +, ;, <=, <, >, >=, ==, !=, ], ), , , got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
+
 		}
 
-		if( currentToken == "29" ) {
-			getNextToken(currentToken);
-			return;
-		}
-	}
+		void factor(string &currentToken) {
+			if( currentToken == "28" ) {
+				getNextToken(currentToken);
+				factor_prime(currentToken);
+				return;
+			}
 
-	void factor_prime(string &currentToken) {
-		if( currentToken == "24" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "25" ) {
+			if( currentToken == "22" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "23" ) {
+					getNextToken(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected ) , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "29" ) {
 				getNextToken(currentToken);
 				return;
-			} else {
-				cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
-				abort();
 			}
 		}
 
-		if( currentToken == "22" ) {
-			getNextToken(currentToken);
-			call_stmt(currentToken);
-			return;
-		}
-
-		if( currentToken == "12" || currentToken == "9" || currentToken == "11" || currentToken == "10" ||
-			currentToken == "17" || currentToken == "16" || currentToken == "18" || currentToken == "19" ||
-			currentToken == "14" || currentToken == "15" || currentToken == "20" || currentToken == "25" ||
-			currentToken == "23" || currentToken == "21" ) {
-
-			return;
-		} else {
-			cout << "Syntax Error: Expected either *, /, -, +, <=, <, >, >=, ==, !=, ;, ], ), or , got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}   
-	}
-
-	void call_stmt(string &currentToken) {
-		if( currentToken == "28" ) {
-			getNextToken(currentToken);
-			factor_prime(currentToken);
-			term_prime(currentToken);
-			arithmetic_expression_prime(currentToken);
-			args(currentToken);
-			if( currentToken == "23" ) {
+		void factor_prime(string &currentToken) {
+			if( currentToken == "24" ) {
 				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "25" ) {
+					getNextToken(currentToken);
+					return;
+				} else {
+					cout << "Syntax Error: Expected ] , got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "22" ) {
+				getNextToken(currentToken);
+				call_stmt(currentToken);
+				return;
+			}
+
+			if( currentToken == "12" || currentToken == "9" || currentToken == "11" || currentToken == "10" ||
+				currentToken == "17" || currentToken == "16" || currentToken == "18" || currentToken == "19" ||
+				currentToken == "14" || currentToken == "15" || currentToken == "20" || currentToken == "25" ||
+				currentToken == "23" || currentToken == "21" ) {
+
 				return;
 			} else {
-				cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+				cout << "Syntax Error: Expected either *, /, -, +, <=, <, >, >=, ==, !=, ;, ], ), or , got: " + getTokenString(currentToken) << "\n";
 				abort();
-			}
+			}   
 		}
 
-		if( currentToken == "22" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			if( currentToken == "23" ) {
+		void call_stmt(string &currentToken) {
+			if( currentToken == "28" ) {
 				getNextToken(currentToken);
+				factor_prime(currentToken);
 				term_prime(currentToken);
 				arithmetic_expression_prime(currentToken);
 				args(currentToken);
@@ -1694,46 +1675,62 @@ class SyntaxAnalysis {
 					cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
 					abort();
 				}
+			}
+
+			if( currentToken == "22" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				if( currentToken == "23" ) {
+					getNextToken(currentToken);
+					term_prime(currentToken);
+					arithmetic_expression_prime(currentToken);
+					args(currentToken);
+					if( currentToken == "23" ) {
+						getNextToken(currentToken);
+						return;
+					} else {
+						cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+						abort();
+					}
+				} else {
+					cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
+					abort();
+				}
+			}
+
+			if( currentToken == "29" ) {
+				getNextToken(currentToken);
+				term_prime(currentToken);
+				arithmetic_expression_prime(currentToken);
+				args(currentToken);
+				if( currentToken == "23" ) {
+					getNextToken(currentToken);
+					return;
+				} 
+			}
+
+			if( currentToken == "23" ) {
+				getNextToken(currentToken);
+				return;
+			}
+
+		}
+
+		void args(string &currentToken) {
+			if( currentToken == "21" ) {
+				getNextToken(currentToken);
+				arithmetic_expression(currentToken);
+				args(currentToken);
+				return;
+			}
+
+			if( currentToken == "23") {
+				return;
 			} else {
 				cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
 				abort();
 			}
 		}
-
-		if( currentToken == "29" ) {
-			getNextToken(currentToken);
-			term_prime(currentToken);
-			arithmetic_expression_prime(currentToken);
-			args(currentToken);
-			if( currentToken == "23" ) {
-				getNextToken(currentToken);
-				return;
-			} 
-		}
-
-		if( currentToken == "23" ) {
-			getNextToken(currentToken);
-			return;
-		}
-
-	}
-
-	void args(string &currentToken) {
-		if( currentToken == "21" ) {
-			getNextToken(currentToken);
-			arithmetic_expression(currentToken);
-			args(currentToken);
-			return;
-		}
-
-		if( currentToken == "23") {
-			return;
-		} else {
-			cout << "Syntax Error: Expected ), got: " + getTokenString(currentToken) << "\n";
-			abort();
-		}
-	}
-
 };
 
 

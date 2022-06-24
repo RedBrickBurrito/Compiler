@@ -314,7 +314,7 @@ class UnorderedHashTable {
 					return;
 				}
 
-				cout << table[hashArr[i]]->getContent() << " --> " << "Variable : " << table[hashArr[i]]->getVariableProperty() <<
+				cout << table[hashArr[i]]->getContent() << " 	--> " << "Variable : " << table[hashArr[i]]->getVariableProperty() <<
 						" " << "Function : " << table[hashArr[i]]->getFunctionProperty() << " " << "Global : " << table[hashArr[i]]->getGlobalProperty() <<
 						" " << "Local : " << table[hashArr[i]]->getLocalProperty() << " " << "Args : " << table[hashArr[i]]->getNumberOfArgs() << "\n";
 			}
